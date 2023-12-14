@@ -27,7 +27,7 @@ def main():
 
             log_current_time(time_of_price)
             display_graph(bitcoin_price_list, eth_price_list, ltc_price_list)
-            time.sleep(4)
+            time.sleep(10)
     else:
         print("RIP")
 
@@ -43,10 +43,22 @@ def pull_crypto(url, price_list):
         price_list.append(item_string)
 
 
-def display_graph(btc_list, eth_list, lsc_list):
+def display_graph(btc_list, eth_list, ltc_list):
     x_values = range(1, len(btc_list) + 1)
-    plt.plot(x_values, btc_list, label="Bitcoin")
 
+    plt.subplot(1, 3, 3)
+    plt.plot(x_values, ltc_list, label="Litecoin")
+    plt.title("Litecoin")
+
+    plt.subplot(1, 3, 3)
+    plt.plot(x_values, eth_list, label="Ethereum")
+    plt.title("Ethereum")
+
+    plt.subplot(1, 3, 3)
+    plt.plot(x_values, btc_list, label="Bitcoin")
+    plt.title("Bitcoin")
+
+    plt.tight_layout()
     plt.legend()
     plt.show()
 
