@@ -1,5 +1,7 @@
 import requests
-from lxml import html
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup
 import time
 import matplotlib.pyplot as plt
 import datetime
@@ -7,9 +9,9 @@ import datetime
 
 def main():
     bitcoin_price_list, eth_price_list, ltc_price_list, time_of_price = [], [], [], []
-    bitcoin_url = "https://www.webull.com/cryptocurrency/bitcoin"
-    eth_url = "https://www.webull.com/cryptocurrency/ethereum"
-    ltc_url = "https://www.webull.com/cryptocurrency/litecoin"
+    bitcoin_url = "https://www.webull.com/quote/nasdaq-tsla"
+    eth_url = "https://www.webull.com/quote/nasdaq-tsla"
+    ltc_url = "https://www.webull.com/quote/nasdaq-tsla"
 
     btc_check = initial_check(bitcoin_url)
     eth_check = initial_check(eth_url)
@@ -18,9 +20,9 @@ def main():
     if btc_check and eth_check and ltc_check:
         try:
             while True:
-                pull_crypto(bitcoin_url, bitcoin_price_list)
-                pull_crypto(eth_url, eth_price_list)
-                pull_crypto(ltc_url, ltc_price_list)
+                pull_stock(bitcoin_url, bitcoin_price_list)
+                pull_stock(eth_url, eth_price_list)
+                pull_stock(ltc_url, ltc_price_list)
 
                 log_current_time(time_of_price)
                 display_graph(bitcoin_price_list, eth_price_list, ltc_price_list)
@@ -32,21 +34,22 @@ def main():
         print("The request for HTML was denied")
 
 
-def pull_crypto(url, price_list):
-    response = requests.get(url)
-    if response.status_code != 200:
-        print("HTML request denied")
-        exit()
+def pull_stock(url, price_list):
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
 
-    parsed_page = html.fromstring(response.content)
-    price = parsed_page.xpath('//*[@class="price"]')
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get(url)
+    page_source = driver.page_source
 
-    for item in price:
-        print(item.text_content())
-        item_string = str(item.text_content())
-        item_float = item_string.replace(",", "")
-        item_float = float(item_float)
-        price_list.append(item_float)
+    soup = BeautifulSoup(page_source, 'html.parser')
+
+    price_element = soup.find('div', class_='csr121 csr118')
+    if price_element:
+        price = price_element.text.strip()
+        print(f"The price is now {price}")
+        price = float(price)
+        price_list.append(price)
 
 
 def display_graph(btc_list, eth_list, ltc_list):
@@ -57,8 +60,8 @@ def display_graph(btc_list, eth_list, ltc_list):
     plt.subplot(1, 3, 1)
     plt.plot(x_values, ltc_list, color="blue")
     plt.title("Litecoin")
-    bot = min(ltc_list) - .1
-    top = max(ltc_list) + .1
+    bot = min(ltc_list) - 1
+    top = max(ltc_list) + 1
     plt.ylim(bot, top)
     plt.xticks([])
 
@@ -73,8 +76,8 @@ def display_graph(btc_list, eth_list, ltc_list):
     plt.subplot(1, 3, 3)
     plt.plot(x_values, btc_list, color="orange")
     plt.title("Bitcoin")
-    bot = min(btc_list) - 5
-    top = max(btc_list) + 5
+    bot = min(btc_list) - 1
+    top = max(btc_list) + 1
     plt.ylim(bot, top)
     plt.xticks([])
 
