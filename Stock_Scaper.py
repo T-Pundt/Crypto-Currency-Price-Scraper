@@ -10,7 +10,7 @@ import datetime
 def main():
     bitcoin_price_list, eth_price_list, ltc_price_list, time_of_price = [], [], [], []
     bitcoin_url = "https://www.webull.com/quote/nasdaq-tsla"
-    eth_url = "https://www.webull.com/quote/nasdaq-tsla"
+    eth_url = "https://www.webull.com/quote/nasdaq-aapl"
     ltc_url = "https://www.webull.com/quote/nasdaq-tsla"
 
     btc_check = initial_check(bitcoin_url)
@@ -50,6 +50,12 @@ def pull_stock(url, price_list):
         print(f"The price is now {price}")
         price = float(price)
         price_list.append(price)
+    else:
+        price_element = soup.find('div', class_='csr122 csr118')
+        price = price_element.text.strip()
+        price = float(price)
+        price_list.append(price)
+        print(price)
 
 
 def display_graph(btc_list, eth_list, ltc_list):
