@@ -5,31 +5,41 @@ from bs4 import BeautifulSoup
 import time
 import matplotlib.pyplot as plt
 import datetime
+from openpyxl import Workbook
+
 
 
 def main():
-    bitcoin_price_list, eth_price_list, ltc_price_list, time_of_price = [], [], [], []
-    bitcoin_url = "https://www.webull.com/quote/nasdaq-tsla"
-    eth_url = "https://www.webull.com/quote/nasdaq-aapl"
-    ltc_url = "https://www.webull.com/quote/nasdaq-tsla"
+    tesla_price_list, apple_price_list, amazon_price_list = [], [], []
+    tesla_time_list, apple_time_list, amazon_time_list = [], [], []
+    tesla_url = "https://www.webull.com/quote/nasdaq-tsla"
+    apple_url = "https://www.webull.com/quote/nasdaq-aapl"
+    amazon_url = "https://www.webull.com/quote/nasdaq-amzn"
 
-    btc_check = initial_check(bitcoin_url)
-    eth_check = initial_check(eth_url)
-    ltc_check = initial_check(ltc_url)
+    tesla_check = initial_check(tesla_url)
+    apple_check = initial_check(apple_url)
+    amazon_check = initial_check(amazon_url)
 
-    if btc_check and eth_check and ltc_check:
+    if tesla_check and apple_check and amazon_check:
         try:
             while True:
-                pull_stock(bitcoin_url, bitcoin_price_list)
-                pull_stock(eth_url, eth_price_list)
-                pull_stock(ltc_url, ltc_price_list)
+                pull_stock(tesla_url, tesla_price_list)
+                log_current_time(tesla_time_list)
 
-                log_current_time(time_of_price)
-                display_graph(bitcoin_price_list, eth_price_list, ltc_price_list)
+                pull_stock(apple_url, apple_price_list)
+                log_current_time(apple_time_list)
+
+                pull_stock(amazon_url, amazon_price_list)
+                log_current_time(amazon_time_list)
+
+                display_graph(tesla_price_list, apple_price_list, amazon_price_list)
                 time.sleep(10)
+
         except KeyboardInterrupt:
-            # Call the function that exports the data to an Excel sheet
+            export_data_to_excel(tesla_price_list, apple_price_list, amazon_price_list, tesla_time_list, apple_time_list, amazon_time_list)
             print("Program was ended by the user")
+            exit()
+
     else:
         print("The request for HTML was denied")
 
@@ -56,6 +66,8 @@ def pull_stock(url, price_list):
         price = float(price)
         price_list.append(price)
         print(price)
+
+    driver.quit()
 
 
 def display_graph(btc_list, eth_list, ltc_list):
@@ -111,6 +123,25 @@ def log_current_time(time_list):
     current_time = hour + ":" + minute + ":" + second
 
     time_list.append(current_time)
+
+
+def export_data_to_excel(tesla_price, apple_price, amazon_price, tesla_time, apple_time, amazon_time):
+    data_columns = [tesla_price, apple_price, amazon_price, tesla_time, apple_time, amazon_time]
+
+    data_rows = zip(*data_columns)
+
+    workbook = Workbook()
+    sheet = workbook.active
+
+    headers = "Tesla Price", "Apple Price", "Amazon Price", "Tesla Time", "Apple Time", "Amazon Time"
+    sheet.append(headers)
+
+    for row in data_rows:
+        sheet.append(row)
+
+    excel_filename = "output_data.xlsx"
+    workbook.save(excel_filename)
+    print("Please")
 
 
 if __name__ == '__main__':
