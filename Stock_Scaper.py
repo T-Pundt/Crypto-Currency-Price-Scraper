@@ -8,40 +8,41 @@ import datetime
 from openpyxl import Workbook
 
 
-
 def main():
     tesla_price_list, apple_price_list, amazon_price_list = [], [], []
     tesla_time_list, apple_time_list, amazon_time_list = [], [], []
     tesla_url = "https://www.webull.com/quote/nasdaq-tsla"
     apple_url = "https://www.webull.com/quote/nasdaq-aapl"
     amazon_url = "https://www.webull.com/quote/nasdaq-amzn"
-
     tesla_check = initial_check(tesla_url)
     apple_check = initial_check(apple_url)
     amazon_check = initial_check(amazon_url)
 
+    loop_amount = input("How many rows of data would you like to collect?: ")
+    loop_amount = int(loop_amount)
+
     if tesla_check and apple_check and amazon_check:
-        try:
-            while True:
-                pull_stock(tesla_url, tesla_price_list)
-                log_current_time(tesla_time_list)
+        for i in range(1, loop_amount + 1):
+            pull_stock(tesla_url, tesla_price_list)
+            log_current_time(tesla_time_list)
 
-                pull_stock(apple_url, apple_price_list)
-                log_current_time(apple_time_list)
+            pull_stock(apple_url, apple_price_list)
+            log_current_time(apple_time_list)
 
-                pull_stock(amazon_url, amazon_price_list)
-                log_current_time(amazon_time_list)
+            pull_stock(amazon_url, amazon_price_list)
+            log_current_time(amazon_time_list)
 
-                display_graph(tesla_price_list, apple_price_list, amazon_price_list)
-                time.sleep(10)
-
-        except KeyboardInterrupt:
-            export_data_to_excel(tesla_price_list, apple_price_list, amazon_price_list, tesla_time_list, apple_time_list, amazon_time_list)
-            print("Program was ended by the user")
-            exit()
+            display_graph(tesla_price_list, apple_price_list, amazon_price_list)
+            time.sleep(10)
+            print(f"Completed {i} rows")
 
     else:
         print("The request for HTML was denied")
+        exit()
+
+    export_data_to_excel(tesla_price_list, apple_price_list, amazon_price_list, tesla_time_list, apple_time_list, amazon_time_list)
+    print("Program was ended by the user")
+    exit()
 
 
 def pull_stock(url, price_list):
@@ -57,7 +58,6 @@ def pull_stock(url, price_list):
     price_element = soup.find('div', class_='csr121 csr118')
     if price_element:
         price = price_element.text.strip()
-        print(f"The price is now {price}")
         price = float(price)
         price_list.append(price)
     else:
@@ -65,7 +65,6 @@ def pull_stock(url, price_list):
         price = price_element.text.strip()
         price = float(price)
         price_list.append(price)
-        print(price)
 
     driver.quit()
 
@@ -141,7 +140,6 @@ def export_data_to_excel(tesla_price, apple_price, amazon_price, tesla_time, app
 
     excel_filename = "output_data.xlsx"
     workbook.save(excel_filename)
-    print("Please")
 
 
 if __name__ == '__main__':
