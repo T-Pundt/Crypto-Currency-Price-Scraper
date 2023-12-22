@@ -1,1 +1,1 @@
-
+This program will track the stock prices of Tesla, Amazon, and Apple for the amount of time specified by the user. The program will create a graph of the data along with exporting the data to an Excel sheet when the program is complete.
